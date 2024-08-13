@@ -1,0 +1,26 @@
+[ndbd default]
+NoOfReplicas=1
+DataMemory=1024M
+
+[ndb_mgmd]
+hostname=172.18.0.2
+NodeId=1
+datadir=/var/lib/mysql
+
+[ndbd]
+hostname=172.18.0.3
+NodeId=2
+datadir=/var/lib/mysql
+
+[ndbd]
+hostname=172.18.0.4
+NodeId=3
+datadir=/var/lib/mysql
+
+[ndbd]
+hostname=172.18.0.5
+NodeId=4
+datadir=/var/lib/mysql
+
+[mysqld]
+hostname=172.18.0.100

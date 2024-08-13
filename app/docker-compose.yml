@@ -1,0 +1,22 @@
+# docker run -d --name dotnetsdk -p 5001:5001 mcr.microsoft.com/dotnet/sdk:8.0 tail -f /dev/null
+# docker-compose -f app/docker-compose.yml up -d
+# dotnet WebApplication5.dll --urls="http://*:8080"
+networks:
+    s84account:
+        external: true
+
+services:
+    dotnetsdk80:
+        image: mcr.microsoft.com/dotnet/sdk:8.0
+        container_name: dotnetsdk80
+        working_dir: /dotnet/publish
+        command: 'dotnet S84Account.dll --urls="http://*:8080"'
+        # command: 'tail -f /dev/null'
+        ports:
+            - '8080:8080'
+        volumes:
+            - D://MyData/ALLCODE/C_SHARP/Web/S84Account:/dotnet/S84Account:rw
+            - ./publish:/dotnet/publish
+        networks:
+            s84account:
+                ipv4_address: 172.18.2.1

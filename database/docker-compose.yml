@@ -1,0 +1,89 @@
+# docker-compose -f database/docker-compose.yml up -d
+networks:
+    s84account:
+        external: true
+
+volumes:
+    ndb_mgmd:
+        driver: local
+    ndbd1:
+        driver: local
+    ndbd2:
+        driver: local
+    ndbd3:
+        driver: local
+    ndb_mysql:
+        driver: local
+
+services:
+    ndb_mgmd:
+        image: mysql/mysql-cluster:8.0.32
+        container_name: ndb_mgmd
+        command: ndb_mgmd
+        volumes:
+            - ./conf/mysql-cluster.cnf:/etc/mysql-cluster.cnf:ro
+            - ./conf/my.cnf:/etc/my.cnf:ro
+            - ndb_mgmd:/var/lib/mysql:rw
+        networks:
+            s84account:
+                ipv4_address: 172.18.0.2
+
+    ndbd1:
+        image: mysql/mysql-cluster:8.0.32
+        container_name: ndbd1
+        command: ndbd
+        volumes:
+            - ./conf/my.cnf:/etc/my.cnf:ro
+            - ndbd1:/var/lib/mysql:rw
+        networks:
+            s84account:
+                ipv4_address: 172.18.0.3
+        depends_on:
+            - ndb_mgmd
+
+    ndbd2:
+        image: mysql/mysql-cluster:8.0.32
+        container_name: ndbd2
+        command: ndbd
+        volumes:
+            - ./conf/my.cnf:/etc/my.cnf:ro
+            - ndbd2:/var/lib/mysql:rw
+        networks:
+            s84account:
+                ipv4_address: 172.18.0.4
+        depends_on:
+            - ndb_mgmd
+
+    ndbd3:
+        image: mysql/mysql-cluster:8.0.32
+        container_name: ndbd3
+        command: ndbd
+        volumes:
+            - ./conf/my.cnf:/etc/my.cnf:ro
+            - ndbd3:/var/lib/mysql:rw
+        networks:
+            s84account:
+                ipv4_address: 172.18.0.5
+        depends_on:
+            - ndb_mgmd
+
+    mysqld1:
+        image: mysql/mysql-cluster:8.0.32
+        container_name: ndb_sql
+        environment:
+            MYSQL_ROOT_PASSWORD: 123123
+        ports:
+            - '3308:3306'
+        depends_on:
+            - ndb_mgmd
+            - ndbd1
+            - ndbd2
+            - ndbd3
+        volumes:
+            - ./conf/my.cnf:/etc/my.cnf:ro
+            - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+            - ./s84vn.sql:/s84vn.sql
+            - ndb_mysql:/var/lib/mysql:rw
+        networks:
+            s84account:
+                ipv4_address: 172.18.0.100
